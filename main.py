@@ -18,8 +18,6 @@ def find_word(word):
         soup = BeautifulSoup(translation_page.content, 'html.parser')
 
         json_str = json.loads(soup.find(type="application/ld+json").contents[0])
-        print(type(json_str))
-        print(json_str)
 
         audio_download_url = json_str[4]['contentURL']
         audio_file = session.get(audio_download_url)
