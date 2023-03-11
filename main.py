@@ -3,16 +3,27 @@
 import requests
 from bs4 import BeautifulSoup
 import sys
+import json
 
 headers = {'User-Agent': 'Mozilla/5.0'}
 
 
 def find_word(word):
     print(f"Looking for the word {word} in Merriam-Webster...")
+    url = f"https://www.merriam-webster.com/dictionary/{word}"
 
-    url = f"https://media.merriam-webster.com/audio/prons/en/us/mp3/{word[0]}/{word}001.mp3"
     with requests.session() as session:
-        audio_file = session.get(url)
+        translation_page = requests.get(url)
+        translation_page.raise_for_status()
+        soup = BeautifulSoup(translation_page.content, 'html.parser')
+
+        json_str = json.loads(soup.find(type="application/ld+json").contents[0])
+        print(type(json_str))
+        print(json_str)
+
+        audio_download_url = json_str[4]['contentURL']
+        audio_file = session.get(audio_download_url)
+        audio_file.raise_for_status()
         with open(f"/Users/bochkovoy/Downloads/{word}.mp3", 'wb') as file:
             file.write(audio_file.content)
         print("Done!")
